@@ -133,7 +133,7 @@ def eigRankOneUpdate(V, E, t, rho, acc=1e-12, verbose=False):
 
     tBarNum = Fbar.reshape(-1, 1) - Ebar
     # add identity to prevent 0 on diagonal
-    # (gives 0 when doing the product of rows/column)
+    # (prevents 0 when doing the product of rows/column)
     tBarDen = Ebar.reshape(-1, 1) - Ebar + np.eye(Nt)
     # the actual product under square root
     tBar = np.sign(tBar) * np.sqrt(np.sign(rho) * (tBarNum / tBarDen).prod(axis=0))

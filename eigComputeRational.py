@@ -1,9 +1,6 @@
 import numpy as np
-from numpy.linalg import norm
-from birdseye import eye
 
 
-@eye
 def eigComputeRational(i, E, t, rho, tol=1e-10, maxIter=2000):
     """
     The status values returned are:
@@ -107,11 +104,10 @@ def eigComputeRational(i, E, t, rho, tol=1e-10, maxIter=2000):
 
     return mu, status
 
-@eye
+
 def evaluateRationals(x, delta, u, i, N):
     iL = np.arange(i + 1)
     iU = np.arange(i + 1, N)
-
     psi = u[iL].dot(u[iL] / (delta[iL] - x))
     phi = u[iU].dot(u[iU] / (delta[iU] - x))
     Dpsi = u[iL].dot(u[iL] / (delta[iL] - x)**2)
