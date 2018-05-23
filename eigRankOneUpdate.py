@@ -1,10 +1,8 @@
 import numpy as np
 from numpy.linalg import norm
 from eigComputeRational import eigComputeRational
-from birdseye import eye
 
 
-@eye
 def eigRankOneUpdate(V, E, t, rho, acc=1e-12, verbose=False):
     """
     EIGRANKONEUPDATE   Compute eigendecomposition of a rank-1 perturbation
@@ -64,35 +62,6 @@ def eigRankOneUpdate(V, E, t, rho, acc=1e-12, verbose=False):
     d = len(uniqueEigs)
 
     for i in range(d):
-        # # Determine where the array starts and ends
-        # inds = np.where(uIndex == i)[0]
-        # multiplicity = len(inds)
-        # startEig = inds[0]
-        # endEig = inds[-1]
-
-        # # If this is a multiple eigenvalue, zero out all the components of t
-        # # but one corresponding to the one closest to the next highest (if rho
-        # # > 0, lowest if rho < 0)
-        # if multiplicity > 1:
-        #     v = t[startEig:endEig + 1]
-        #     v_norm = norm(v)
-
-        #     if rho < 0:
-        #         t[startEig:endEig + 1] = np.concatenate(
-        #             (np.array([v_norm]), np.zeros(multiplicity - 1)))
-        #         v[0] += v_norm
-        #     else:
-        #         t[startEig:endEig + 1] = np.concatenate(
-        #             (np.zeros(multiplicity - 1), np.array([-v_norm])))
-        #         v[multiplicity - 1] += v_norm
-
-        #     # Sometimes, some values slip through despite the accuracy check
-        #     # above. Make sure that the eigenvector calulation remains
-        #     # numerically backward stable
-        #     if v_norm > Gt * (maxLambda + tNorm**2) * acc:
-        #         V[:, startEig:endEig + 1] -= 2 * V[:, startEig:endEig + 1].dot(
-        #             np.outer(v, v)) / v_norm**2
-
         inds = np.where(uIndex == i)[0]
         multiplicity = len(inds)
 
@@ -109,6 +78,7 @@ def eigRankOneUpdate(V, E, t, rho, acc=1e-12, verbose=False):
                     (np.zeros(multiplicity - 1), np.array([-v_norm])))
                 v[-1] += v_norm
 
+            v_norm = norm(v)
             if v_norm > Gt * (maxLambda + tNorm**2) * acc:
                 V[:, inds] -= 2 * V[:, inds].dot(np.outer(v, v)) / v_norm**2
 
@@ -169,9 +139,12 @@ def eigRankOneUpdate(V, E, t, rho, acc=1e-12, verbose=False):
     tBar = np.sign(tBar) * np.sqrt(np.sign(rho) * (tBarNum / tBarDen).prod(axis=0))
 
     # Compute the eigenvectors using the corrected entries of t
-    W = V
+    W = np.copy(V)
     for i in range(Nt):
         W[:, tI[i]] = (V[:, tI].dot(tBar / (Fbar[i] - Ebar))).flatten()
+
+    # normalize by columns
+    W /= norm(W, axis=0)
 
     i, j = np.where(np.isnan(W))
     W[i, j] = V[i, j]
